@@ -16,8 +16,8 @@
 
 package ru.elifantiev.android.roboerrorreporter;
 
+
 import android.content.Context;
-import android.util.Log;
 
 /**
  * Simple error reporting facility.
