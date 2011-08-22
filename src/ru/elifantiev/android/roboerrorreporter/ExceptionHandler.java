@@ -17,6 +17,8 @@
 package ru.elifantiev.android.roboerrorreporter;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Environment;
 
 import java.io.File;
@@ -30,10 +32,22 @@ final class ExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     private final DateFormat formatter = new SimpleDateFormat("dd.MM.yy HH:mm");
     private final DateFormat fileFormatter = new SimpleDateFormat("dd-MM-yy");
+    private String versionName = "0";
+    private int versionCode = 0;
     private final String stacktraceDir;
     private final Thread.UncaughtExceptionHandler previousHandler;
 
     private ExceptionHandler(Context context) {
+
+        PackageManager mPackManager = context.getPackageManager();
+        PackageInfo mPackInfo;
+        try {
+            mPackInfo = mPackManager.getPackageInfo(context.getPackageName(), 0);
+            versionName = mPackInfo.versionName;
+            versionCode = mPackInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            // ignore
+        }
         previousHandler = Thread.getDefaultUncaughtExceptionHandler();
         stacktraceDir = String.format("/Android/data/%s/files/", context.getPackageName());
     }
@@ -51,10 +65,9 @@ final class ExceptionHandler implements Thread.UncaughtExceptionHandler {
             StringBuilder reportBuilder = new StringBuilder();
             reportBuilder
                     .append("\n\n\n")
-                    .append(formatter.format(dumpDate))
-                    .append("\n")
-                    .append(thread.toString())
-                    .append("\n");
+                    .append(formatter.format(dumpDate)).append("\n")
+                    .append(String.format("Version: %s (%d)\n", versionName, versionCode))
+                    .append(thread.toString()).append("\n");
             processThrowable(exception, reportBuilder);
 
             File sd = Environment.getExternalStorageDirectory();
