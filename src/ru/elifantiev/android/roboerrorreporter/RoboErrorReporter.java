@@ -38,5 +38,9 @@ public final class RoboErrorReporter {
     public static void bindReporter(Context context) {
         Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler.inContext(context));
     }
+    
+    public static void reportError(Context context, Throwable error) {
+        ExceptionHandler.reportOnlyHandler(context).uncaughtException(Thread.currentThread(), error);
+    }
 
 }

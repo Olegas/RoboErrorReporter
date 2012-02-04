@@ -37,7 +37,7 @@ final class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     private final String stacktraceDir;
     private final Thread.UncaughtExceptionHandler previousHandler;
 
-    private ExceptionHandler(Context context) {
+    private ExceptionHandler(Context context, boolean chained) {
 
         PackageManager mPackManager = context.getPackageManager();
         PackageInfo mPackInfo;
@@ -48,12 +48,19 @@ final class ExceptionHandler implements Thread.UncaughtExceptionHandler {
         } catch (PackageManager.NameNotFoundException e) {
             // ignore
         }
-        previousHandler = Thread.getDefaultUncaughtExceptionHandler();
+        if(chained)
+            previousHandler = Thread.getDefaultUncaughtExceptionHandler();
+        else
+            previousHandler = null;
         stacktraceDir = String.format("/Android/data/%s/files/", context.getPackageName());
     }
 
     static ExceptionHandler inContext(Context context) {
-        return new ExceptionHandler(context);
+        return new ExceptionHandler(context, true);
+    }
+    
+    static ExceptionHandler reportOnlyHandler(Context context) {
+        return new ExceptionHandler(context, false);
     }
 
     @Override
